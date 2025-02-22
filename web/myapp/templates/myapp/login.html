@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login</title>
+</head>
+<body>
+    <button onclick="handleGoogleLogin()">Sign in with Google</button>
+
+    <script type="module">
+        import { signInWithGoogle } from '/static/js/supabase.js';
+
+        window.handleGoogleLogin = async () => {
+            const data = await signInWithGoogle();
+            if (data) {
+                window.location.href = '/'; // Redirect to home page after successful login
+            }
+        };
+    </script>
+</body>
+</html> 
