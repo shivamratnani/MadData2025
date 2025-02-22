@@ -10,7 +10,12 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
+import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,7 +30,15 @@ SECRET_KEY = "django-insecure-(*xp%s#@pttj(j42(oo-=z(4dt1@s*(0n=5j44jwu%99pp+f&!
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# Add these settings
+SUPABASE = {
+    'URL': os.getenv('SUPABASE_URL'),
+    'ANON_KEY': os.getenv('SUPABASE_ANON_KEY'),
+    'CALLBACK_URL': os.getenv('SUPABASE_CALLBACK_URL'),
+}
+
+# Add to ALLOWED_HOSTS if you're using the callback URL
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 
 # Application definition
