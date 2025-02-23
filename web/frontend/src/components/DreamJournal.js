@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, ChevronDown, ChevronLeft, User, MessageCircle } from 'lucide-react';
-import { submitDream } from '../api';
+import { Menu, ChevronDown, ChevronRight, User, MessageCircle } from 'lucide-react';
+import { submitDream, fetchDreams } from '../api';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import dayjs from 'dayjs';
 
 const Calendar = () => {
   const today = new Date();
@@ -69,19 +70,28 @@ const Calendar = () => {
 const DreamJournal = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
-  const [dreams, setDreams] = useState([
-    {
-      id: 1,
-      date: '2025-01-20',
-      text: 'I dreamt I was flying above a burning home',
-      tags: ['fire', 'home', 'fear', 'flying'],
-      aiAnalysis: 'This dream suggests themes of escape and transformation...',
-      showAnalysis: false
-    }
-  ]);
+  const [dreams, setDreams] = useState([]);
   const [newDream, setNewDream] = useState('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+
+  useEffect(() => {
+    const getDreams = async () => {
+      try {
+        const data = await fetchDreams();
+        if (Array.isArray(data) && data.length > 0) {
+          setDreams(data);  // Set dreams with dynamic data from Supabase
+        } else {
+          console.log("No dreams found or data is empty");
+        }
+      } catch (error) {
+        console.error("Error fetching dreams:", error);
+      }
+    };
+
+    getDreams();
+  }, []);
 
   const handleSignOut = async () => {
     try {
@@ -116,9 +126,9 @@ const DreamJournal = () => {
   };
 
   const toggleAnalysis = (dreamId) => {
-    setDreams(dreams.map(dream => 
-      dream.id === dreamId 
-        ? {...dream, showAnalysis: !dream.showAnalysis}
+    setDreams(dreams.map(dream =>
+      dream.dream_id === dreamId
+        ? { ...dream, showAnalysis: !dream.showAnalysis }
         : dream
     ));
   };
@@ -233,26 +243,26 @@ const DreamJournal = () => {
 
           <div className="space-y-6">
             {dreams.map((dream) => (
-              <div key={dream.id} className="bg-white p-6 rounded-lg border border-gray-200">
-                <div className="text-sm text-gray-500 mb-2">{dream.date}</div>
-                <p className="mb-4">{dream.text}</p>
+              <div key={dream.dream_id} className="bg-white p-6 rounded-lg border border-gray-200">
+                <div className="text-sm text-gray-500 mb-2">{dayjs(dream.timestamp).format('YYYY-MM-DD')}</div>
+                <p className="mb-4">{dream.dream_text}</p>
                 <div className="flex flex-wrap gap-2 mb-4">
-                  {dream.tags.map((tag, i) => (
+                  {dream.themes_symbols.map((tag, i) => (
                     <span key={i} className="px-3 py-1 bg-gray-100 rounded-full text-sm">
                       {tag}
                     </span>
                   ))}
                 </div>
                 <div className="flex gap-2">
-                  <button 
-                    onClick={() => toggleAnalysis(dream.id)}
-                    className="text-sm border border-blue-500 rounded px-3 py-1 inline-flex items-center text-blue-500"
-                  >
-                    <ChevronLeft className={`w-4 h-4 mr-1 transform transition-transform ${dream.showAnalysis ? 'rotate-90' : ''}`} />
-                    ai analysis
-                  </button>
-                  <button 
-                    onClick={() => navigate(`/chat/${dream.id}`)}
+                <button 
+                  onClick={() => toggleAnalysis(dream.dream_id)}
+                  className="text-sm border border-blue-500 rounded px-3 py-1 inline-flex items-center text-blue-500"
+                >
+                  <ChevronRight className={`w-4 h-4 mr-1 transform transition-transform ${dream.showAnalysis ? 'rotate-90' : ''}`} />
+                  ai analysis
+                </button>
+                <button 
+                    onClick={() => navigate(`/chat/${dream.dream_id}`)}
                     className="text-sm border border-blue-500 rounded px-3 py-1 inline-flex items-center text-blue-500"
                   >
                     <MessageCircle className="w-4 h-4 mr-1" />
@@ -261,7 +271,7 @@ const DreamJournal = () => {
                 </div>
                 {dream.showAnalysis && (
                   <div className="mt-4 pl-4 text-sm text-gray-600">
-                    {dream.aiAnalysis}
+                    {dream.interpretation}
                   </div>
                 )}
               </div>
@@ -283,9 +293,8 @@ const DreamJournal = () => {
             </button>
             {isFilterOpen && (
               <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg py-1">
-                <button className="w-full text-left px-3 py-2 hover:bg-gray-50 text-sm">Latest first</button>
-                <button className="w-full text-left px-3 py-2 hover:bg-gray-50 text-sm">Oldest first</button>
-                <button className="w-full text-left px-3 py-2 hover:bg-gray-50 text-sm">Has analysis</button>
+                <button className="w-full text-left px-3 py-2 hover:bg-gray-50 text-sm">latest first</button>
+                <button className="w-full text-left px-3 py-2 hover:bg-gray-50 text-sm">oldest first</button>
               </div>
             )}
           </div>
