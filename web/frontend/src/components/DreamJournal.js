@@ -123,6 +123,20 @@ const DreamJournal = () => {
     ));
   };
 
+  // Add keyboard event listener
+  useEffect(() => {
+    const handleEsc = (event) => {
+      if (event.key === 'Escape') {
+        setIsSidebarOpen(!isSidebarOpen);
+      }
+    };
+    window.addEventListener('keydown', handleEsc);
+
+    return () => {
+      window.removeEventListener('keydown', handleEsc);
+    };
+  }, [isSidebarOpen]);
+
   return (
     <div className="min-h-screen bg-gray-50 font-mono">
       <div className="fixed top-4 right-4 z-20 flex items-center gap-2">
@@ -175,6 +189,13 @@ const DreamJournal = () => {
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
+        <button
+          onClick={() => setIsSidebarOpen(false)}
+          className="absolute top-2 right-2 px-3 py-1 text-xs text-gray-500 hover:bg-gray-100 rounded"
+        >
+          ESC
+        </button>
+
         <div className="mt-8 space-y-2 p-4">
           <a href="#dreams" className="block py-2 hover:bg-gray-50 rounded px-3">my dreams</a>
           <a href="#chat" className="block py-2 hover:bg-gray-50 rounded px-3 flex items-center gap-2">
