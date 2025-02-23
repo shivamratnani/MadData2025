@@ -1,14 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../supabase';
 
 const Profile = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
-    name: 'John Doe',
-    email: 'john.doe@example.com',
+    name: '',
+    email: '',
     newPassword: '',
     confirmPassword: ''
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+
+  useEffect(() => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    
+    setFormData(prev => ({
+      ...prev,
+      email: user.email || '',
+      name: user.user_metadata?.name || ''
+    }));
+  }, [user, navigate]);
 
   const handleChange = (e) => {
     setFormData({
@@ -19,8 +38,44 @@ const Profile = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: Implement profile update logic
-    console.log('Profile update:', formData);
+    setError('');
+    setSuccess('');
+    setLoading(true);
+
+    try {
+      if (formData.newPassword) {
+        if (formData.newPassword !== formData.confirmPassword) {
+          throw new Error('Passwords do not match');
+        }
+        if (formData.newPassword.length < 6) {
+          throw new Error('Password must be at least 6 characters');
+        }
+      }
+
+      if (formData.newPassword) {
+        const { error: passwordError } = await supabase.auth.updateUser({
+          password: formData.newPassword
+        });
+        if (passwordError) throw passwordError;
+      }
+
+      const { error: metadataError } = await supabase.auth.updateUser({
+        data: { name: formData.name }
+      });
+      if (metadataError) throw metadataError;
+
+      setFormData(prev => ({
+        ...prev,
+        newPassword: '',
+        confirmPassword: ''
+      }));
+
+      setSuccess('Profile updated successfully');
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleBack = () => {
@@ -36,6 +91,16 @@ const Profile = () => {
         ← Back
       </button>
       <div className="max-w-2xl mx-auto bg-white dark:bg-dark-800 rounded-lg shadow p-8">
+        {error && (
+          <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+            {error}
+          </div>
+        )}
+        {success && (
+          <div className="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
+            {success}
+          </div>
+        )}
         <div className="flex flex-col items-center mb-8">
           <div className="w-32 h-32 bg-gray-200 rounded-full mb-4 relative">
             <div className="absolute bottom-0 right-0 bg-black text-white p-2 rounded-full cursor-pointer">
@@ -98,9 +163,10 @@ const Profile = () => {
 
           <button
             type="submit"
-            className="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800"
+            disabled={loading}
+            className="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 disabled:opacity-50"
           >
-            Save Changes
+            {loading ? 'Saving...' : 'Save Changes'}
           </button>
         </form>
       </div>
