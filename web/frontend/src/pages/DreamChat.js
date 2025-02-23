@@ -56,7 +56,7 @@ const DreamChat = () => {
           'HTTP-Referer': 'http://localhost:3000'
         },
         body: JSON.stringify({
-          model: 'anthropic/claude-3-sonnet',
+          model: 'google/gemini-2.0-flash-001',
           messages: [
             {
               role: 'system',
@@ -74,7 +74,15 @@ const DreamChat = () => {
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         console.error('API Error Details:', errorData);
-        throw new Error(`HTTP error! status: ${response.status}`);
+        
+        // Handle specific error cases
+        if (response.status === 429) {
+          throw new Error('Too many requests. Please wait a moment before trying again.');
+        } else if (errorData.error?.message) {
+          throw new Error(errorData.error.message);
+        } else {
+          throw new Error(`Request failed with status: ${response.status}`);
+        }
       }
 
       const data = await response.json();
@@ -85,14 +93,29 @@ const DreamChat = () => {
           role: 'assistant',
           content: data.choices[0].message.content
         }]);
+      } else if (data.error) {
+        // Handle error response with custom message
+        throw new Error(
+          data.error.message || 
+          'The AI assistant is temporarily unavailable. Please try again in a moment.'
+        );
       } else {
-        throw new Error('Invalid response format from API');
+        throw new Error('Unexpected response format from AI assistant');
       }
     } catch (error) {
       console.error('Error sending message:', error);
+      let errorMessage = error.message;
+      
+      // Provide user-friendly error messages
+      if (errorMessage.includes('API key not found')) {
+        errorMessage = 'Configuration error. Please contact support.';
+      } else if (errorMessage.includes('Failed to fetch')) {
+        errorMessage = 'Network error. Please check your connection and try again.';
+      }
+
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: `Error: ${error.message}. Please try again.`
+        content: `⚠️ ${errorMessage}`
       }]);
     } finally {
       setLoading(false);
