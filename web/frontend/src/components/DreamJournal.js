@@ -96,7 +96,8 @@ const DreamJournal = () => {
   const [newDream, setNewDream] = useState('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState("newest");
+  const [sortOrder, setSortOrder] = useState("newest");
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   // Initialize dark mode from localStorage
   useEffect(() => {
@@ -286,7 +287,7 @@ const DreamJournal = () => {
           </div>
 
           <div className="space-y-6">
-            {dreams.map((dream) => (
+            {sortedDreams.map((dream) => (
               <div key={dream.dream_id} className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
                 <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">
                   {dayjs(dream.timestamp).format('YYYY-MM-DD')}
@@ -344,8 +345,22 @@ const DreamJournal = () => {
             </button>
             {isFilterOpen && (
               <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg py-1">
-                <button className="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 text-sm text-gray-600 dark:text-gray-200">latest first</button>
-                <button className="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 text-sm text-gray-600 dark:text-gray-200">oldest first</button>
+                <button 
+                  onClick={() => setSortOrder("newest")}
+                  className={`w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 text-sm text-gray-600 dark:text-gray-200 ${
+                    sortOrder === "newest" ? "bg-gray-50 dark:bg-gray-700" : ""
+                  }`}
+                >
+                  latest first
+                </button>
+                <button 
+                  onClick={() => setSortOrder("oldest")}
+                  className={`w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 text-sm text-gray-600 dark:text-gray-200 ${
+                    sortOrder === "oldest" ? "bg-gray-50 dark:bg-gray-700" : ""
+                  }`}
+                >
+                  oldest first
+                </button>
               </div>
             )}
           </div>
