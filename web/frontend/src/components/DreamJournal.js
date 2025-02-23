@@ -153,12 +153,6 @@ const DreamJournal = () => {
         {user ? (
           <>
             <button
-              onClick={() => navigate('/chat')} 
-              className="p-2 hover:bg-gray-100 rounded-full"
-            >
-              <MessageCircle className="w-6 h-6" />
-            </button>
-            <button
               onClick={handleSignOut}
               className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded"
             >
@@ -203,7 +197,7 @@ const DreamJournal = () => {
           onClick={() => setIsSidebarOpen(false)}
           className="absolute top-2 right-2 px-3 py-1 text-xs text-gray-500 hover:bg-gray-100 rounded"
         >
-          ESC
+          esc
         </button>
 
         <div className="mt-8 space-y-2 p-4">
