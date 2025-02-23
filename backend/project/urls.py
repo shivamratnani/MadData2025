@@ -1,5 +1,5 @@
 """
-URL configuration for webapp project.
+URL configuration for project project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/5.1/topics/http/urls/
@@ -16,12 +16,8 @@ Including another URLconf
 """
 
 from django.contrib import admin
-from django.urls import path, include
-from django.conf import settings
-from django.conf.urls.static import static
+from django.urls import path
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("auth/", include("myapp.auth_urls")),
-    path("api/", include("myapp.urls")),
-] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+]

@@ -1,6 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Send } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../lib/supabase';
+
+const markdownStyles = {
+  p: 'mb-4 last:mb-0',
+  strong: 'font-bold',
+  em: 'italic',
+  ul: 'list-disc ml-4 mb-4',
+  ol: 'list-decimal ml-4 mb-4',
+  li: 'mb-2',
+  blockquote: 'border-l-4 border-gray-300 dark:border-gray-600 pl-4 italic my-4'
+};
+
+const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:8000/api';
 
 const DreamChat = () => {
   const { dreamId } = useParams();
@@ -8,22 +23,52 @@ const DreamChat = () => {
   const messagesEndRef = useRef(null);
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [dreamData, setDreamData] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const { user } = useAuth();
 
-  // Dummy data for the dream
-  const dreamData = {
-    text: 'I dreamt I was flying above a burning home',
-    date: '2025-01-20',
-    tags: ['fire', 'home', 'fear', 'flying'],
-    analysis: 'This dream suggests themes of escape and transformation. The burning home could represent a desire to leave behind old patterns or situations, while flying indicates a sense of freedom and transcendence. The presence of fire may symbolize both destruction and purification.',
-    messages: [
-      {
-        role: 'assistant',
-        content: 'I notice this dream has strong elements of both freedom (flying) and danger (burning home). Would you like to explore what these contrasting elements might mean for you?'
+  useEffect(() => {
+    const fetchDreamData = async () => {
+      try {
+        if (!user) throw new Error('No authenticated user');
+
+        // Fetch dream directly from Supabase
+        const { data, error } = await supabase
+          .from('Dreams')
+          .select('*')
+          .eq('dream_id', dreamId)
+          .eq('user_id', user.id)
+          .single();
+
+        if (error) throw error;
+        if (!data) throw new Error('Dream not found');
+
+        console.log('Received dream data:', data);
+        
+        setDreamData({
+          text: data.dream_text,
+          date: new Date(data.timestamp).toISOString().split('T')[0],
+          tags: data.themes_symbols || [],
+          analysis: data.interpretation || 'No analysis available',
+        });
+
+        setMessages([{
+          role: 'assistant',
+          content: 'I\'ve analyzed your dream. What aspects would you like to explore further?'
+        }]);
+      } catch (error) {
+        console.error('Error fetching dream:', error);
+        alert(error.message);
+        navigate('/');
       }
-    ]
-  };
+    };
 
-  const [messages, setMessages] = useState(dreamData.messages);
+    if (dreamId && user) {
+      fetchDreamData();
+    } else if (!user) {
+      navigate('/login');
+    }
+  }, [dreamId, navigate, user]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -35,7 +80,7 @@ const DreamChat = () => {
 
   const sendMessage = async (e) => {
     e.preventDefault();
-    if (!message.trim()) return;
+    if (!message.trim() || !dreamData) return;
 
     const userMessage = { role: 'user', content: message };
     setMessages(prev => [...prev, userMessage]);
@@ -60,7 +105,17 @@ const DreamChat = () => {
           messages: [
             {
               role: 'system',
-              content: `You are a dream analysis assistant. Help interpret dreams with psychological insight and empathy. The current dream being discussed is: "${dreamData.text}". The identified themes are: ${dreamData.tags.join(', ')}. Initial analysis: ${dreamData.analysis}`
+              content: `You are a dream analysis assistant. Keep your responses focused and concise (2-3 paragraphs max). 
+              Always relate your interpretations back to the specific elements of the user's dream: "${dreamData.text}". 
+              The identified themes are: ${dreamData.tags.join(', ')}. 
+              Initial analysis: ${dreamData.analysis}
+              
+              Guidelines:
+              - Keep responses brief but insightful
+              - Reference specific dream elements in your analysis
+              - Focus on the user's questions about their dream
+              - Avoid generic interpretations
+              - Don't speculate beyond what's in the dream content`
             },
             ...messages.map(msg => ({
               role: msg.role,
@@ -122,6 +177,15 @@ const DreamChat = () => {
     }
   };
 
+  // Show loading state while fetching dream data
+  if (!dreamData) {
+    return (
+      <div className="min-h-screen bg-gray-50 font-mono flex items-center justify-center">
+        <div className="animate-pulse">Loading dream data...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 font-mono">
       {/* Header */}
@@ -160,7 +224,19 @@ const DreamChat = () => {
         <div className="mb-6">
           <div className="text-sm text-gray-500 mb-2">Analysis</div>
           <div className="bg-white p-4 rounded-lg border border-gray-200">
-            <p className="text-sm">{dreamData.analysis}</p>
+            <ReactMarkdown
+              components={{
+                p: ({node, ...props}) => <p className={`text-sm ${markdownStyles.p}`} {...props} />,
+                strong: ({node, ...props}) => <strong className={markdownStyles.strong} {...props} />,
+                em: ({node, ...props}) => <em className={markdownStyles.em} {...props} />,
+                ul: ({node, ...props}) => <ul className={markdownStyles.ul} {...props} />,
+                ol: ({node, ...props}) => <ol className={markdownStyles.ol} {...props} />,
+                li: ({node, ...props}) => <li className={markdownStyles.li} {...props} />,
+                blockquote: ({node, ...props}) => <blockquote className={markdownStyles.blockquote} {...props} />
+              }}
+            >
+              {dreamData.analysis}
+            </ReactMarkdown>
           </div>
         </div>
 
@@ -178,7 +254,19 @@ const DreamChat = () => {
                     : 'bg-white border border-gray-200'
                 }`}
               >
-                {msg.content}
+                <ReactMarkdown
+                  components={{
+                    p: ({node, ...props}) => <p className={markdownStyles.p} {...props} />,
+                    strong: ({node, ...props}) => <strong className={markdownStyles.strong} {...props} />,
+                    em: ({node, ...props}) => <em className={markdownStyles.em} {...props} />,
+                    ul: ({node, ...props}) => <ul className={markdownStyles.ul} {...props} />,
+                    ol: ({node, ...props}) => <ol className={markdownStyles.ol} {...props} />,
+                    li: ({node, ...props}) => <li className={markdownStyles.li} {...props} />,
+                    blockquote: ({node, ...props}) => <blockquote className={markdownStyles.blockquote} {...props} />
+                  }}
+                >
+                  {msg.content}
+                </ReactMarkdown>
               </div>
             </div>
           ))}
