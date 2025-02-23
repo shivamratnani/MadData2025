@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import GoogleIcon from '../components/GoogleIcon';
+import { Eye, EyeOff } from 'lucide-react';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -13,6 +14,10 @@ const Register = () => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPasswords, setShowPasswords] = useState({
+    password: false,
+    confirmPassword: false
+  });
 
   const handleChange = (e) => {
     setFormData({
@@ -79,28 +84,46 @@ const Register = () => {
 
           <div>
             <label className="block mb-2">Password</label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              className="w-full p-3 border border-gray-200 rounded-lg"
-              required
-              disabled={loading}
-            />
+            <div className="relative">
+              <input
+                type={showPasswords.password ? "text" : "password"}
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                className="w-full p-3 border border-gray-200 rounded-lg pr-10"
+                required
+                disabled={loading}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPasswords({...showPasswords, password: !showPasswords.password})}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+              >
+                {showPasswords.password ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
           </div>
 
           <div>
             <label className="block mb-2">Confirm Password</label>
-            <input
-              type="password"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              className="w-full p-3 border border-gray-200 rounded-lg"
-              required
-              disabled={loading}
-            />
+            <div className="relative">
+              <input
+                type={showPasswords.confirmPassword ? "text" : "password"}
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                className="w-full p-3 border border-gray-200 rounded-lg pr-10"
+                required
+                disabled={loading}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPasswords({...showPasswords, confirmPassword: !showPasswords.confirmPassword})}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+              >
+                {showPasswords.confirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
           </div>
 
           <button
