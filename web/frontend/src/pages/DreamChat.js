@@ -4,6 +4,7 @@ import { ArrowLeft, Send } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
+import logo from '../assets/icon.png';
 
 const markdownStyles = {
   p: 'mb-4 last:mb-0',

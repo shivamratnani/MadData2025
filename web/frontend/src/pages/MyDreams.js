@@ -5,6 +5,7 @@ import ReactMarkdown from 'react-markdown';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import dayjs from 'dayjs';
+import logo from '../assets/icon.png';
 
 const markdownStyles = {
   p: 'mb-4 last:mb-0',
@@ -175,6 +176,14 @@ const MyDreams = () => {
         >
           esc
         </button>
+
+        {/* Add Logo and App Name */}
+        <div className="flex items-center justify-center mt-6">
+          <img src={logo} alt="Dreams Logo" className="w-12 h-12" />
+          <span className="ml-3 text-xl font-semibold text-gray-800 dark:text-gray-200">
+            dreams
+          </span>
+        </div>
 
         <div className="mt-8 space-y-2 p-4">
           <Link 
