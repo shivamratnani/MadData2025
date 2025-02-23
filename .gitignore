@@ -4,6 +4,8 @@
 !.env.example
 
 # Python
+web/myapp/__pycache__/
+web/project/__pycache__/
 __pycache__/
 *.py[cod]
 *$py.class
