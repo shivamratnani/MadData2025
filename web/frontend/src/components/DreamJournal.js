@@ -275,13 +275,23 @@ const DreamJournal = () => {
 
         <div className="mt-8 space-y-2 p-4">
           <Link 
+            to="/" 
+            className="block py-2 bg-gray-200 dark:bg-dark-600 rounded px-3 text-gray-800 dark:text-gray-200"
+          >
+            home
+          </Link>
+          <Link 
             to="/my-dreams" 
             className="block py-2 hover:bg-gray-50 dark:hover:bg-dark-700 rounded px-3 text-gray-600 dark:text-gray-300"
           >
             my dreams
           </Link>
-          <a href="#themes" className="block py-2 hover:bg-gray-50 rounded px-3">themes & symbols</a>
-          <a href="#about" className="block py-2 hover:bg-gray-50 rounded px-3">about</a>
+          <a href="#themes" className="block py-2 hover:bg-gray-50 dark:hover:bg-dark-700 rounded px-3 text-gray-600 dark:text-gray-300">
+            themes & symbols
+          </a>
+          <a href="#about" className="block py-2 hover:bg-gray-50 dark:hover:bg-dark-700 rounded px-3 text-gray-600 dark:text-gray-300">
+            about
+          </a>
         </div>
       </nav>
 

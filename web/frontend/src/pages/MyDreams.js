@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ChevronDown, ChevronUp, MessageCircle, ArrowLeft } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { ChevronDown, ChevronUp, MessageCircle, ArrowLeft, Menu, User, Moon, Sun } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
@@ -18,10 +18,51 @@ const markdownStyles = {
 
 const MyDreams = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const [dreams, setDreams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedDreams, setExpandedDreams] = useState({});
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  // Initialize dark mode from localStorage
+  useEffect(() => {
+    const savedDarkMode = localStorage.getItem('darkMode') === 'true';
+    setIsDarkMode(savedDarkMode);
+    if (savedDarkMode) {
+      document.documentElement.classList.add('dark');
+    }
+  }, []);
+
+  // Toggle dark mode
+  const toggleDarkMode = () => {
+    setIsDarkMode(!isDarkMode);
+    document.documentElement.classList.toggle('dark');
+    localStorage.setItem('darkMode', !isDarkMode);
+  };
+
+  // Add keyboard event listener for sidebar
+  useEffect(() => {
+    const handleEsc = (event) => {
+      if (event.key === 'Escape') {
+        setIsSidebarOpen(!isSidebarOpen);
+      }
+    };
+    window.addEventListener('keydown', handleEsc);
+
+    return () => {
+      window.removeEventListener('keydown', handleEsc);
+    };
+  }, [isSidebarOpen]);
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      navigate('/login');
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
 
   useEffect(() => {
     const fetchDreams = async () => {
@@ -72,8 +113,93 @@ const MyDreams = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-dark-900 py-8">
-      <div className="max-w-4xl mx-auto px-4">
+    <div className="min-h-screen bg-gray-50 dark:bg-dark-900 font-mono">
+      {/* Top Bar Buttons */}
+      <div className="fixed top-4 right-4 z-20 flex items-center gap-2">
+        <button
+          onClick={toggleDarkMode}
+          className="p-2 hover:bg-gray-100 dark:hover:bg-dark-700 rounded-full text-gray-600 dark:text-gray-300"
+        >
+          {isDarkMode ? <Sun className="w-6 h-6" /> : <Moon className="w-6 h-6" />}
+        </button>
+        {user ? (
+          <>
+            <button
+              onClick={handleSignOut}
+              className="px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded"
+            >
+              Sign Out
+            </button>
+            <button
+              onClick={() => navigate('/profile')}
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full"
+            >
+              <User className="w-6 h-6 text-gray-600 dark:text-gray-300" />
+            </button>
+          </>
+        ) : (
+          <button
+            onClick={() => navigate('/login')}
+            className="px-4 py-2 bg-black dark:bg-white text-white dark:text-black rounded hover:bg-gray-800 dark:hover:bg-gray-100"
+          >
+            Login
+          </button>
+        )}
+      </div>
+
+      {/* Menu Button */}
+      <button 
+        onClick={() => setIsSidebarOpen(true)}
+        className="fixed top-4 left-4 p-2 z-20 text-gray-600 dark:text-gray-200"
+      >
+        <Menu className="w-6 h-6" />
+      </button>
+
+      {/* Sidebar Overlay */}
+      <div 
+        className={`fixed inset-0 bg-black transition-opacity duration-300 ${
+          isSidebarOpen ? 'opacity-20 z-30' : 'opacity-0 -z-10'
+        }`}
+        onClick={() => setIsSidebarOpen(false)}
+      />
+
+      {/* Sidebar */}
+      <nav 
+        className={`fixed left-0 top-0 w-64 h-full bg-white dark:bg-dark-800 shadow-lg transform transition-transform duration-300 ease-in-out z-40 ${
+          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        <button
+          onClick={() => setIsSidebarOpen(false)}
+          className="absolute top-2 right-2 px-3 py-1 text-xs text-gray-500 hover:bg-gray-100 rounded"
+        >
+          esc
+        </button>
+
+        <div className="mt-8 space-y-2 p-4">
+          <Link 
+            to="/" 
+            className="block py-2 hover:bg-gray-50 dark:hover:bg-dark-700 rounded px-3 text-gray-600 dark:text-gray-300"
+          >
+            home
+          </Link>
+          <Link 
+            to="/my-dreams" 
+            className="block py-2 bg-gray-50 dark:bg-dark-700 rounded px-3 text-gray-600 dark:text-gray-300"
+          >
+            my dreams
+          </Link>
+          <a href="#themes" className="block py-2 hover:bg-gray-50 dark:hover:bg-dark-700 rounded px-3 text-gray-600 dark:text-gray-300">
+            themes & symbols
+          </a>
+          <a href="#about" className="block py-2 hover:bg-gray-50 dark:hover:bg-dark-700 rounded px-3 text-gray-600 dark:text-gray-300">
+            about
+          </a>
+        </div>
+      </nav>
+
+      {/* Main Content */}
+      <div className="max-w-4xl mx-auto px-4 pt-24">
         {/* Header */}
         <div className="mb-8 flex items-center gap-4">
           <button 
@@ -161,16 +287,16 @@ const MyDreams = () => {
                   <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">
                     Analysis
                   </div>
-                  <div className="prose dark:prose-dark max-w-none">
+                  <div className="prose dark:prose-dark max-w-none text-gray-600 dark:text-gray-300">
                     <ReactMarkdown
                       components={{
-                        p: ({node, ...props}) => <p className={`text-sm ${markdownStyles.p}`} {...props} />,
-                        strong: ({node, ...props}) => <strong className={markdownStyles.strong} {...props} />,
-                        em: ({node, ...props}) => <em className={markdownStyles.em} {...props} />,
-                        ul: ({node, ...props}) => <ul className={markdownStyles.ul} {...props} />,
-                        ol: ({node, ...props}) => <ol className={markdownStyles.ol} {...props} />,
-                        li: ({node, ...props}) => <li className={markdownStyles.li} {...props} />,
-                        blockquote: ({node, ...props}) => <blockquote className={markdownStyles.blockquote} {...props} />
+                        p: ({node, ...props}) => <p className={`text-sm text-gray-600 dark:text-gray-300 ${markdownStyles.p}`} {...props} />,
+                        strong: ({node, ...props}) => <strong className={`text-gray-800 dark:text-gray-100 ${markdownStyles.strong}`} {...props} />,
+                        em: ({node, ...props}) => <em className={`text-gray-700 dark:text-gray-200 ${markdownStyles.em}`} {...props} />,
+                        ul: ({node, ...props}) => <ul className={`text-gray-600 dark:text-gray-300 ${markdownStyles.ul}`} {...props} />,
+                        ol: ({node, ...props}) => <ol className={`text-gray-600 dark:text-gray-300 ${markdownStyles.ol}`} {...props} />,
+                        li: ({node, ...props}) => <li className={`text-gray-600 dark:text-gray-300 ${markdownStyles.li}`} {...props} />,
+                        blockquote: ({node, ...props}) => <blockquote className={`text-gray-600 dark:text-gray-300 ${markdownStyles.blockquote}`} {...props} />
                       }}
                     >
                       {dream.interpretation}
