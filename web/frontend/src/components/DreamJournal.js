@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Menu, ChevronDown, ChevronRight, User, MessageCircle, Moon, Sun } from 'lucide-react';
 import { submitDream, fetchDreams } from '../api';
 import { useNavigate } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
 import { useAuth } from '../contexts/AuthContext';
 import dayjs from 'dayjs';
 
@@ -89,6 +90,17 @@ const Calendar = () => {
   );
 };
 
+// First, let's add some custom styles for the markdown content
+const markdownStyles = {
+  p: 'mb-4 last:mb-0',  // Add margin between paragraphs
+  strong: 'font-bold',   // Style bold text
+  em: 'italic',         // Style italic text
+  ul: 'list-disc ml-4 mb-4', // Style unordered lists
+  ol: 'list-decimal ml-4 mb-4', // Style ordered lists
+  li: 'mb-2',           // Style list items
+  blockquote: 'border-l-4 border-gray-300 dark:border-gray-600 pl-4 italic my-4' // Style quotes
+};
+
 const DreamJournal = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
@@ -154,11 +166,11 @@ const DreamJournal = () => {
     try {
       const response = await submitDream(newDream);
       const dream = {
-        id: dreams.length + 1,
-        date: new Date().toISOString().split('T')[0],
-        text: newDream,
-        tags: response.themes || ['analyzing...'],
-        aiAnalysis: response.analysis || 'Analyzing...',
+        dream_id: response.data.dream_id,
+        dream_text: response.data.dream_text,
+        themes_symbols: response.data.themes,
+        interpretation: response.data.analysis,
+        timestamp: response.data.created_at,
         showAnalysis: false
       };
 
@@ -191,6 +203,16 @@ const DreamJournal = () => {
       window.removeEventListener('keydown', handleEsc);
     };
   }, [isSidebarOpen]);
+
+  const handleChatClick = (dreamId) => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    
+    console.log('Navigating to chat with dream ID:', dreamId);
+    navigate(`/chat/${dreamId}`);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 font-mono">
@@ -253,10 +275,7 @@ const DreamJournal = () => {
 
         <div className="mt-8 space-y-2 p-4">
           <a href="#dreams" className="block py-2 hover:bg-gray-50 rounded px-3">my dreams</a>
-          <a href="#chat" className="block py-2 hover:bg-gray-50 rounded px-3 flex items-center gap-2">
-            <MessageCircle className="w-4 h-4" />
-            chat
-          </a>
+          <a href="#chat" className="block py-2 hover:bg-gray-50 rounded px-3 flex items-center gap-2">chat</a>
           <a href="#themes" className="block py-2 hover:bg-gray-50 rounded px-3">themes & symbols</a>
           <a href="#about" className="block py-2 hover:bg-gray-50 rounded px-3">about</a>
           <a href="#account" className="block py-2 hover:bg-gray-50 rounded px-3">account</a>
@@ -309,7 +328,7 @@ const DreamJournal = () => {
                     ai analysis
                   </button>
                   <button 
-                    onClick={() => navigate(`/chat/${dream.dream_id}`)}
+                    onClick={() => handleChatClick(dream.dream_id)}
                     className="text-sm border border-blue-500 rounded px-3 py-1 inline-flex items-center text-blue-500"
                   >
                     <MessageCircle className="w-4 h-4 mr-1" />
@@ -322,8 +341,20 @@ const DreamJournal = () => {
                     ${dream.showAnalysis ? 'max-h-40 opacity-100 mt-4' : 'max-h-0 opacity-0'}
                   `}
                 >
-                  <div className="pl-4 text-sm text-gray-600">
-                    {dream.interpretation}
+                  <div className="pl-4 text-sm text-gray-600 dark:text-gray-300">
+                    <ReactMarkdown
+                      components={{
+                        p: ({node, ...props}) => <p className={markdownStyles.p} {...props} />,
+                        strong: ({node, ...props}) => <strong className={markdownStyles.strong} {...props} />,
+                        em: ({node, ...props}) => <em className={markdownStyles.em} {...props} />,
+                        ul: ({node, ...props}) => <ul className={markdownStyles.ul} {...props} />,
+                        ol: ({node, ...props}) => <ol className={markdownStyles.ol} {...props} />,
+                        li: ({node, ...props}) => <li className={markdownStyles.li} {...props} />,
+                        blockquote: ({node, ...props}) => <blockquote className={markdownStyles.blockquote} {...props} />
+                      }}
+                    >
+                      {dream.interpretation}
+                    </ReactMarkdown>
                   </div>
                 </div>
               </div>
