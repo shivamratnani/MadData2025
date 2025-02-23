@@ -32,7 +32,6 @@ export const fetchDreams = async () => {
         throw new Error(userError.message);
       }
   
-      // Ensure the user exists and has an ID
       if (!user || !user.id) {
         throw new Error('User is not authenticated or user ID is missing');
       }

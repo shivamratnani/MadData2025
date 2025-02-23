@@ -96,7 +96,7 @@ const DreamJournal = () => {
   const [newDream, setNewDream] = useState('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState("newest");
 
   // Initialize dark mode from localStorage
   useEffect(() => {
@@ -130,6 +130,12 @@ const DreamJournal = () => {
 
     getDreams();
   }, []);
+
+  const sortedDreams = [...dreams].sort((a, b) => {
+    return sortOrder === "newest"
+      ? dayjs(b.timestamp).valueOf() - dayjs(a.timestamp).valueOf()
+      : dayjs(a.timestamp).valueOf() - dayjs(b.timestamp).valueOf();
+  });
 
   const handleSignOut = async () => {
     try {
