@@ -248,14 +248,14 @@ const DreamJournal = () => {
                   ))}
                 </div>
                 <div className="flex gap-2">
-                <button 
-                  onClick={() => toggleAnalysis(dream.dream_id)}
-                  className="text-sm border border-blue-500 rounded px-3 py-1 inline-flex items-center text-blue-500"
-                >
-                  <ChevronRight className={`w-4 h-4 mr-1 transform transition-transform ${dream.showAnalysis ? 'rotate-90' : ''}`} />
-                  ai analysis
-                </button>
-                <button 
+                  <button 
+                    onClick={() => toggleAnalysis(dream.dream_id)}
+                    className="text-sm border border-blue-500 rounded px-3 py-1 inline-flex items-center text-blue-500"
+                  >
+                    <ChevronRight className={`w-4 h-4 mr-1 transform transition-transform duration-300 ${dream.showAnalysis ? 'rotate-90' : ''}`} />
+                    ai analysis
+                  </button>
+                  <button 
                     onClick={() => navigate(`/chat/${dream.dream_id}`)}
                     className="text-sm border border-blue-500 rounded px-3 py-1 inline-flex items-center text-blue-500"
                   >
@@ -263,11 +263,16 @@ const DreamJournal = () => {
                     chat
                   </button>
                 </div>
-                {dream.showAnalysis && (
-                  <div className="mt-4 pl-4 text-sm text-gray-600">
+                <div 
+                  className={`
+                    overflow-hidden transition-all duration-300 ease-in-out
+                    ${dream.showAnalysis ? 'max-h-40 opacity-100 mt-4' : 'max-h-0 opacity-0'}
+                  `}
+                >
+                  <div className="pl-4 text-sm text-gray-600">
                     {dream.interpretation}
                   </div>
-                )}
+                </div>
               </div>
             ))}
           </div>
