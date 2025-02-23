@@ -110,8 +110,6 @@ if __name__ == "__main__":
     
 
 
-<<<<<<< HEAD
-=======
 # what we do is we load the data frame in the same way we did the 
 def get_data(self):
         folder_path = "./dreams"
@@ -140,4 +138,3 @@ def get_data(self):
 # if we have to get teh themes we can do that in the same way we did in torch.py
 # split into train test
 # model fir we can do tensorlfow pytorch or even sci kit learn if we have to
->>>>>>> efe01513d6042bd04ef7357997deec3644fdb8f0

@@ -65,15 +65,11 @@ class Transformation:
         # want to
         with torch.no_grad():
             outputs = self.model(**inputs)
-<<<<<<< HEAD
-        last_hidden_state = outputs.last_hidden_state  
-        pooled_output = outputs.pooler_output 
-        return pooled_output 
-=======
+
         last_hidden_state = outputs.last_hidden_state
         pooled_output = outputs.pooler_output
         return last_hidden_state
->>>>>>> efe01513d6042bd04ef7357997deec3644fdb8f0
+        #return pooled_output
 
     def llm_processing(self):
         # we are going to use openai and
