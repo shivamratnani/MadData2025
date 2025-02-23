@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, ChevronDown, ChevronLeft, User, MessageCircle } from 'lucide-react';
+import { Menu, ChevronDown, ChevronRight, User, MessageCircle } from 'lucide-react';
 import { submitDream, fetchDreams } from '../api';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
