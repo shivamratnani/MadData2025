@@ -2,7 +2,9 @@ import torch
 from transformers import BertTokenizer, BertModel, BertForSequenceClassification
 import os
 import pandas as pd
-
+import json
+from google.cloud import aiplatform
+import openai
 
 class Transformation():
     def __init__(self,passage):
@@ -12,10 +14,14 @@ class Transformation():
         self.empty = []
         self.data_frame = pd.DataFrame(self.empty)
         # Initialize Gemini client
-        self.gemini_key = os.getenv('GEMINI_API_KEY')
-        if not self.gemini_key:
-            raise ValueError("GEMINI_API_KEY not found in environment variables")
+        self.openai_key = os.getenv('OPENAI_API_KEY')
+        if not self.openai_key:
+            raise ValueError("Openai_API_KEY not found in environment variables")
         self.passage  = passage
+        self.dream  = ""
+        self.themes = []
+        self.symbols = []
+
 
     def get_data(self):
         folder_path = "./dreams"
@@ -56,7 +62,7 @@ class Transformation():
 
         #print("dinfosdnfosdnofsdn")
         #another waybof going about it where we can break it down
-        inp = self.tokenizer.tokenize("I had a dream about flying")
+        inp = self.tokenizer.tokenize(sentence)
         #then convert each word into a numerical value
         ids = self.tokenizer.convert_tokens_to_ids(inp)
         #print(ids)
@@ -69,5 +75,19 @@ class Transformation():
         pooled_output = outputs.pooler_output 
         return last_hidden_state 
 
-    def llm_processing(self,features ):
-        print(5)
+    def llm_processing(self):
+        # we are going to use openai and 
+        #print(5)
+        self.openai_key
+        prompt = f"""
+        Analyze this dream{self.dream} and its themes{self.themes}. Give a detailed response to why someone may be having these dreams and using these symbols, 
+        {self.symbols} explain what they represent. Tell the person whether they would need to go be more mindful of their activities if theyre dreams
+        are very negative. Explain also any emotional undertones they might be going through."""
+        chat = openai.ChatCompletion.create(
+            model = "gpt-3.5-turbo",
+            messages = [
+            {"role":"user", "content":prompt}
+            ]
+        )
+        return chat
+
