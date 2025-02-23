@@ -135,6 +135,12 @@ const About = () => {
             my dreams
           </Link>
           <Link 
+            to="/graph" 
+            className="block py-2 hover:bg-gray-50 dark:hover:bg-dark-700 rounded px-3 text-gray-600 dark:text-gray-300"
+          >
+            graph view
+          </Link>
+          <Link 
             to="/about"
             className="block py-2 bg-gray-50 dark:bg-dark-700 rounded px-3 text-gray-600 dark:text-gray-300"
           >

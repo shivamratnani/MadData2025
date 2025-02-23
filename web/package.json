@@ -10,6 +10,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@supabase/supabase-js": "^2.48.1"
+    "@supabase/supabase-js": "^2.48.1",
+    "d3": "^7.9.0",
+    "react-force-graph": "^1.47.3",
+    "react-force-graph-2d": "^1.27.0",
+    "three": "^0.173.0"
   }
 }
