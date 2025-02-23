@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Send } from 'lucide-react';
+import { ArrowLeft, Send, Moon, Sun } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
@@ -28,6 +28,7 @@ const DreamChat = () => {
   const [dreamData, setDreamData] = useState(null);
   const [messages, setMessages] = useState([]);
   const { user } = useAuth();
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
     const fetchDreamData = async () => {
@@ -71,6 +72,14 @@ const DreamChat = () => {
       navigate('/login');
     }
   }, [dreamId, navigate, user]);
+
+  useEffect(() => {
+    const savedDarkMode = localStorage.getItem('darkMode') === 'true';
+    setIsDarkMode(savedDarkMode);
+    if (savedDarkMode) {
+      document.documentElement.classList.add('dark');
+    }
+  }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -179,6 +188,12 @@ const DreamChat = () => {
     }
   };
 
+  const toggleDarkMode = () => {
+    setIsDarkMode(!isDarkMode);
+    document.documentElement.classList.toggle('dark');
+    localStorage.setItem('darkMode', !isDarkMode);
+  };
+
   // Show loading state while fetching dream data
   if (!dreamData) {
     return (
@@ -189,21 +204,30 @@ const DreamChat = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 font-mono">
+    <div className="min-h-screen bg-gray-50 dark:bg-dark-900 font-mono">
       {/* Header */}
-      <div className="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-10">
+      <div className="fixed top-0 left-0 right-0 bg-white dark:bg-dark-800 border-b border-gray-200 dark:border-dark-700 z-10">
         <div className="max-w-3xl mx-auto px-4 py-4">
-          <div className="flex items-center gap-4">
-            <button 
-              onClick={() => navigate('/')}
-              className="p-2 hover:bg-gray-100 rounded-full"
-            >
-              <ArrowLeft className="w-6 h-6" />
-            </button>
-            <div>
-              <div className="text-sm text-gray-500">{dreamData.date}</div>
-              <div className="text-sm font-medium">{dreamData.text}</div>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <button 
+                onClick={() => navigate('/')}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full"
+              >
+                <ArrowLeft className="w-6 h-6 text-gray-600 dark:text-gray-300" />
+              </button>
+              <div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">{dreamData.date}</div>
+                <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{dreamData.text}</div>
+              </div>
             </div>
+            
+            <button
+              onClick={toggleDarkMode}
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full text-gray-600 dark:text-gray-300"
+            >
+              {isDarkMode ? <Sun className="w-6 h-6" /> : <Moon className="w-6 h-6" />}
+            </button>
           </div>
         </div>
       </div>
@@ -212,10 +236,10 @@ const DreamChat = () => {
       <div className="max-w-3xl mx-auto px-4 pt-24 pb-24">
         {/* Tags */}
         <div className="mb-6">
-          <div className="text-sm text-gray-500 mb-2">Themes & Symbols</div>
+          <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">Themes & Symbols</div>
           <div className="flex flex-wrap gap-2">
             {dreamData.tags.map((tag, i) => (
-              <span key={i} className="px-3 py-1 bg-gray-100 rounded-full text-sm">
+              <span key={i} className="px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-full text-sm text-gray-700 dark:text-gray-300">
                 {tag.toLowerCase()}
               </span>
             ))}
@@ -224,11 +248,11 @@ const DreamChat = () => {
 
         {/* Analysis */}
         <div className="mb-6">
-          <div className="text-sm text-gray-500 mb-2">Analysis</div>
-          <div className="bg-white p-4 rounded-lg border border-gray-200">
+          <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">Analysis</div>
+          <div className="bg-white dark:bg-dark-800 p-4 rounded-lg border border-gray-200 dark:border-dark-700">
             <ReactMarkdown
               components={{
-                p: ({node, ...props}) => <p className={`text-sm ${markdownStyles.p}`} {...props} />,
+                p: ({node, ...props}) => <p className={`text-sm text-gray-600 dark:text-gray-300 ${markdownStyles.p}`} {...props} />,
                 strong: ({node, ...props}) => <strong className={markdownStyles.strong} {...props} />,
                 em: ({node, ...props}) => <em className={markdownStyles.em} {...props} />,
                 ul: ({node, ...props}) => <ul className={markdownStyles.ul} {...props} />,
@@ -253,12 +277,14 @@ const DreamChat = () => {
                 className={`max-w-[80%] rounded-lg p-3 ${
                   msg.role === 'user' 
                     ? 'bg-blue-500 text-white' 
-                    : 'bg-white border border-gray-200'
+                    : 'bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 text-gray-900 dark:text-gray-100'
                 }`}
               >
                 <ReactMarkdown
                   components={{
-                    p: ({node, ...props}) => <p className={markdownStyles.p} {...props} />,
+                    p: ({node, ...props}) => <p className={`${markdownStyles.p} ${
+                      msg.role === 'user' ? 'text-white' : 'text-gray-600 dark:text-gray-300'
+                    }`} {...props} />,
                     strong: ({node, ...props}) => <strong className={markdownStyles.strong} {...props} />,
                     em: ({node, ...props}) => <em className={markdownStyles.em} {...props} />,
                     ul: ({node, ...props}) => <ul className={markdownStyles.ul} {...props} />,
@@ -274,8 +300,8 @@ const DreamChat = () => {
           ))}
           {loading && (
             <div className="flex justify-start">
-              <div className="bg-white border border-gray-200 rounded-lg p-3">
-                <div className="animate-pulse">Thinking...</div>
+              <div className="bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-3">
+                <div className="animate-pulse text-gray-600 dark:text-gray-300">Thinking...</div>
               </div>
             </div>
           )}
@@ -284,7 +310,7 @@ const DreamChat = () => {
       </div>
 
       {/* Message Input */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
+      <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-dark-800 border-t border-gray-200 dark:border-dark-700">
         <div className="max-w-3xl mx-auto px-4 py-4">
           <form onSubmit={sendMessage} className="flex gap-2">
             <input
@@ -292,7 +318,7 @@ const DreamChat = () => {
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Type your message..."
-              className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500"
+              className="flex-1 px-4 py-2 bg-white dark:bg-dark-700 border border-gray-200 dark:border-dark-600 rounded-lg focus:outline-none focus:border-blue-500 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
             />
             <button 
               type="submit"
