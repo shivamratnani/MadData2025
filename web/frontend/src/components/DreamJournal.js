@@ -62,7 +62,7 @@ const Calendar = ({ dreams }) => {
             setCurrentMonth(newMonth);
           }}>←</button>
           <span className="font-mono text-xs">
-            {currentMonth.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+            {currentMonth.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }).toLowerCase()}
           </span>
           <button onClick={() => {
             const newMonth = new Date(currentMonth);
@@ -310,12 +310,12 @@ const DreamJournal = () => {
           >
             my dreams
           </Link>
-          <a href="#themes" className="block py-2 hover:bg-gray-50 dark:hover:bg-dark-700 rounded px-3 text-gray-600 dark:text-gray-300">
-            themes & symbols
-          </a>
-          <a href="#about" className="block py-2 hover:bg-gray-50 dark:hover:bg-dark-700 rounded px-3 text-gray-600 dark:text-gray-300">
+          <Link 
+            to="/about"
+            className="block py-2 hover:bg-gray-50 dark:hover:bg-dark-700 rounded px-3 text-gray-600 dark:text-gray-300"
+          >
             about
-          </a>
+          </Link>
         </div>
       </nav>
 
@@ -346,7 +346,7 @@ const DreamJournal = () => {
             {sortedDreams.map((dream) => (
               <div key={dream.dream_id} className="bg-white dark:bg-dark-800 p-6 rounded-lg border border-gray-200 dark:border-dark-700">
                 <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-                  {dayjs(dream.timestamp).format('MMMM D, YYYY')}
+                  {dayjs(dream.timestamp).format('MMMM D, YYYY').toLowerCase()}
                 </div>
                 <p className="mb-4 text-gray-900 dark:text-gray-100">{dream.dream_text}</p>
                 <div className="flex flex-wrap gap-2 mb-4">

@@ -198,12 +198,12 @@ const MyDreams = () => {
           >
             my dreams
           </Link>
-          <a href="#themes" className="block py-2 hover:bg-gray-50 dark:hover:bg-dark-700 rounded px-3 text-gray-600 dark:text-gray-300">
-            themes & symbols
-          </a>
-          <a href="#about" className="block py-2 hover:bg-gray-50 dark:hover:bg-dark-700 rounded px-3 text-gray-600 dark:text-gray-300">
+          <Link 
+            to="/about"
+            className="block py-2 hover:bg-gray-50 dark:hover:bg-dark-700 rounded px-3 text-gray-600 dark:text-gray-300"
+          >
             about
-          </a>
+          </Link>
         </div>
       </nav>
 
@@ -231,7 +231,7 @@ const MyDreams = () => {
               <div className="p-6">
                 <div className="flex justify-between items-start mb-4">
                   <div className="text-sm text-gray-500 dark:text-gray-400">
-                    {dayjs(dream.timestamp).format('MMMM D, YYYY')}
+                    {dayjs(dream.timestamp).format('MMMM D, YYYY').toLowerCase()}
                   </div>
                   <button 
                     onClick={() => handleChatClick(dream.dream_id)}

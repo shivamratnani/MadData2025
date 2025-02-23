@@ -8,6 +8,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import AuthCallback from './components/AuthCallback';
 import MyDreams from './pages/MyDreams';
+import About from './pages/About';
 import './App.css';
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/my-dreams" element={<MyDreams />} />
+          <Route path="/about" element={<About />} />
         </Routes>
       </AuthProvider>
     </Router>
