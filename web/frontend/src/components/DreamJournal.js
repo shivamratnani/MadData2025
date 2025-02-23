@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, ChevronDown, ChevronRight, User, MessageCircle, Moon, Sun } from 'lucide-react';
 import { submitDream, fetchDreams } from '../api';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import { useAuth } from '../contexts/AuthContext';
 import dayjs from 'dayjs';
@@ -274,11 +274,14 @@ const DreamJournal = () => {
         </button>
 
         <div className="mt-8 space-y-2 p-4">
-          <a href="#dreams" className="block py-2 hover:bg-gray-50 rounded px-3">my dreams</a>
-          <a href="#chat" className="block py-2 hover:bg-gray-50 rounded px-3 flex items-center gap-2">chat</a>
+          <Link 
+            to="/my-dreams" 
+            className="block py-2 hover:bg-gray-50 dark:hover:bg-dark-700 rounded px-3 text-gray-600 dark:text-gray-300"
+          >
+            my dreams
+          </Link>
           <a href="#themes" className="block py-2 hover:bg-gray-50 rounded px-3">themes & symbols</a>
           <a href="#about" className="block py-2 hover:bg-gray-50 rounded px-3">about</a>
-          <a href="#account" className="block py-2 hover:bg-gray-50 rounded px-3">account</a>
         </div>
       </nav>
 
