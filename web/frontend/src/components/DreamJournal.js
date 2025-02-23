@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, ChevronDown, ChevronLeft, User } from 'lucide-react';
+import { Menu, ChevronDown, ChevronLeft, User, MessageCircle } from 'lucide-react';
 import { submitDream } from '../api';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -129,6 +129,12 @@ const DreamJournal = () => {
         {user ? (
           <>
             <button
+              onClick={() => navigate('/chat')} 
+              className="p-2 hover:bg-gray-100 rounded-full"
+            >
+              <MessageCircle className="w-6 h-6" />
+            </button>
+            <button
               onClick={handleSignOut}
               className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded"
             >
@@ -158,22 +164,28 @@ const DreamJournal = () => {
         <Menu className="w-6 h-6" />
       </button>
 
-      {isSidebarOpen && (
-        <>
-          <div 
-            className="fixed inset-0 bg-black bg-opacity-20 z-30"
-            onClick={() => setIsSidebarOpen(false)}
-          />
-          <nav className="fixed left-0 top-0 w-64 h-full bg-white z-40 p-4 shadow-lg">
-            <div className="mt-8 space-y-2">
-              <a href="#dreams" className="block py-2 hover:bg-gray-50 rounded px-3">my dreams</a>
-              <a href="#themes" className="block py-2 hover:bg-gray-50 rounded px-3">themes & symbols</a>
-              <a href="#about" className="block py-2 hover:bg-gray-50 rounded px-3">about</a>
-              <a href="#account" className="block py-2 hover:bg-gray-50 rounded px-3">account</a>
-            </div>
-          </nav>
-        </>
-      )}
+      <div 
+        className={`fixed inset-0 bg-black transition-opacity duration-300 ${
+          isSidebarOpen ? 'opacity-20 z-30' : 'opacity-0 -z-10'
+        }`}
+        onClick={() => setIsSidebarOpen(false)}
+      />
+      <nav 
+        className={`fixed left-0 top-0 w-64 h-full bg-white shadow-lg transform transition-transform duration-300 ease-in-out z-40 ${
+          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        <div className="mt-8 space-y-2 p-4">
+          <a href="#dreams" className="block py-2 hover:bg-gray-50 rounded px-3">my dreams</a>
+          <a href="#chat" className="block py-2 hover:bg-gray-50 rounded px-3 flex items-center gap-2">
+            <MessageCircle className="w-4 h-4" />
+            chat
+          </a>
+          <a href="#themes" className="block py-2 hover:bg-gray-50 rounded px-3">themes & symbols</a>
+          <a href="#about" className="block py-2 hover:bg-gray-50 rounded px-3">about</a>
+          <a href="#account" className="block py-2 hover:bg-gray-50 rounded px-3">account</a>
+        </div>
+      </nav>
 
       <div className="flex justify-center gap-8 p-8 pt-16">
         {/* Calendar Section */}
@@ -210,13 +222,22 @@ const DreamJournal = () => {
                     </span>
                   ))}
                 </div>
-                <button 
-                  onClick={() => toggleAnalysis(dream.id)}
-                  className="text-sm border border-blue-500 rounded px-3 py-1 inline-flex items-center text-blue-500"
-                >
-                  <ChevronLeft className={`w-4 h-4 mr-1 transform transition-transform ${dream.showAnalysis ? 'rotate-90' : ''}`} />
-                  ai analysis
-                </button>
+                <div className="flex gap-2">
+                  <button 
+                    onClick={() => toggleAnalysis(dream.id)}
+                    className="text-sm border border-blue-500 rounded px-3 py-1 inline-flex items-center text-blue-500"
+                  >
+                    <ChevronLeft className={`w-4 h-4 mr-1 transform transition-transform ${dream.showAnalysis ? 'rotate-90' : ''}`} />
+                    ai analysis
+                  </button>
+                  <button 
+                    onClick={() => navigate(`/chat/${dream.id}`)}
+                    className="text-sm border border-blue-500 rounded px-3 py-1 inline-flex items-center text-blue-500"
+                  >
+                    <MessageCircle className="w-4 h-4 mr-1" />
+                    chat
+                  </button>
+                </div>
                 {dream.showAnalysis && (
                   <div className="mt-4 pl-4 text-sm text-gray-600">
                     {dream.aiAnalysis}
