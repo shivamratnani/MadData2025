@@ -217,7 +217,7 @@ const MyDreams = () => {
           >
             <ArrowLeft className="w-6 h-6" />
           </button>
-          <h1 className="text-2xl font-semibold dark:text-gray-100">My Dreams</h1>
+          <h1 className="text-2xl font-semibold dark:text-gray-100">my dreams</h1>
         </div>
 
         {/* Dreams List */}
@@ -249,7 +249,7 @@ const MyDreams = () => {
                 {/* Themes & Symbols */}
                 <div className="mb-4">
                   <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-                    Themes & Symbols
+                    themes & symbols
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {dream.themes_symbols?.map((theme, index) => (
@@ -257,7 +257,7 @@ const MyDreams = () => {
                         key={index}
                         className="px-3 py-1 bg-gray-100 dark:bg-dark-700 rounded-full text-sm text-gray-700 dark:text-gray-300"
                       >
-                        {theme}
+                        {theme.toLowerCase()}
                       </span>
                     ))}
                   </div>
@@ -271,12 +271,12 @@ const MyDreams = () => {
                   {expandedDreams[dream.dream_id] ? (
                     <>
                       <ChevronUp className={`w-4 h-4 mr-1 transform transition-transform duration-444`} />
-                      Hide Analysis
+                      hide analysis
                     </>
                   ) : (
                     <>
                       <ChevronDown className={`w-4 h-4 mr-1 transform transition-transform duration-444`} />
-                      Show Analysis
+                      show analysis
                     </>
                   )}
                 </button>
@@ -294,7 +294,7 @@ const MyDreams = () => {
                   ${expandedDreams[dream.dream_id] ? 'pt-4' : 'pt-0'}
                 `}>
                   <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-                    Analysis
+                    analysis
                   </div>
                   <div className="prose dark:prose-dark max-w-none text-gray-600 dark:text-gray-300">
                     <ReactMarkdown

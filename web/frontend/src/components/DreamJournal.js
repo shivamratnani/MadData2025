@@ -7,7 +7,7 @@ import { useAuth } from '../contexts/AuthContext';
 import dayjs from 'dayjs';
 import logo from '../assets/icon.png';
 
-const Calendar = () => {
+const Calendar = ({ dreams }) => {
   const today = new Date();
   const [currentMonth, setCurrentMonth] = useState(today);
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -31,6 +31,16 @@ const Calendar = () => {
     }
 
     return days;
+  };
+
+  // Add a function to check if a date has a dream entry
+  const hasDreamEntry = (year, month, day) => {
+    return dreams.some(dream => {
+      const dreamDate = new Date(dream.timestamp);
+      return dreamDate.getFullYear() === year &&
+             dreamDate.getMonth() === month &&
+             dreamDate.getDate() === day;
+    });
   };
 
   // Update time every second
@@ -70,8 +80,14 @@ const Calendar = () => {
                 ${day === today.getDate() && 
                   currentMonth.getMonth() === today.getMonth() &&
                   currentMonth.getFullYear() === today.getFullYear() 
-                  ? 'bg-gray-100 dark:bg-gray-700' : ''}
+                  ? 'border-2 border-blue-500' : ''}
+                ${day !== null && hasDreamEntry(
+                  currentMonth.getFullYear(),
+                  currentMonth.getMonth(),
+                  day
+                ) ? 'bg-gray-100 dark:bg-gray-700' : ''}
                 dark:text-gray-300
+                rounded
               `}
             >
               {day}
@@ -306,7 +322,7 @@ const DreamJournal = () => {
       <div className="flex justify-center gap-8 p-8 pt-16">
         {/* Calendar Section */}
         <div className="space-y-2">
-          <Calendar />
+          <Calendar dreams={sortedDreams} />
         </div>
 
         {/* Dreams Section */}
@@ -330,13 +346,13 @@ const DreamJournal = () => {
             {sortedDreams.map((dream) => (
               <div key={dream.dream_id} className="bg-white dark:bg-dark-800 p-6 rounded-lg border border-gray-200 dark:border-dark-700">
                 <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-                  {dayjs(dream.timestamp).format('YYYY-MM-DD')}
+                  {dayjs(dream.timestamp).format('MMMM D, YYYY')}
                 </div>
                 <p className="mb-4 text-gray-900 dark:text-gray-100">{dream.dream_text}</p>
                 <div className="flex flex-wrap gap-2 mb-4">
                   {dream.themes_symbols.map((tag, i) => (
                     <span key={i} className="px-3 py-1 bg-gray-100 rounded-full text-sm">
-                      {tag}
+                      {tag.toLowerCase()}
                     </span>
                   ))}
                 </div>
