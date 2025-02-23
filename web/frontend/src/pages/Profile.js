@@ -35,7 +35,7 @@ const Profile = () => {
       >
         ← Back
       </button>
-      <div className="max-w-2xl mx-auto bg-white rounded-lg shadow p-8">
+      <div className="max-w-2xl mx-auto bg-white dark:bg-dark-800 rounded-lg shadow p-8">
         <div className="flex flex-col items-center mb-8">
           <div className="w-32 h-32 bg-gray-200 rounded-full mb-4 relative">
             <div className="absolute bottom-0 right-0 bg-black text-white p-2 rounded-full cursor-pointer">
