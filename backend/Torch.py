@@ -84,7 +84,7 @@ class Transformation():
         {self.symbols} explain what they represent. Tell the person whether they would need to go be more mindful of their activities if theyre dreams
         are very negative. Explain also any emotional undertones they might be going through."""
         chat = openai.ChatCompletion.create(
-            model = "gpt-3.5-turbo",
+            model = "google/gemini-2.0-flash-001",
             messages = [
             {"role":"user", "content":prompt}
             ]
