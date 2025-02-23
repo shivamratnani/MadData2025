@@ -113,7 +113,6 @@ if __name__ == "__main__":
 
 
 # what we do is we load the data frame in the same way we did the 
-
 #the  we get a score for each of the dreams so use tf-idf
 #add the scores into the dataframe
 #then we can clean the data in a few steps
