@@ -74,6 +74,7 @@ const DreamJournal = () => {
   const [newDream, setNewDream] = useState('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [sortOrder, setSortOrder] = useState("newest");
 
 
   useEffect(() => {
@@ -92,6 +93,12 @@ const DreamJournal = () => {
 
     getDreams();
   }, []);
+
+  const sortedDreams = [...dreams].sort((a, b) => {
+    return sortOrder === "newest"
+      ? dayjs(b.timestamp).valueOf() - dayjs(a.timestamp).valueOf()
+      : dayjs(a.timestamp).valueOf() - dayjs(b.timestamp).valueOf();
+  });
 
   const handleSignOut = async () => {
     try {
@@ -236,7 +243,7 @@ const DreamJournal = () => {
           </div>
 
           <div className="space-y-6">
-            {dreams.map((dream) => (
+            {sortedDreams.map((dream) => (
               <div key={dream.dream_id} className="bg-white p-6 rounded-lg border border-gray-200">
                 <div className="text-sm text-gray-500 mb-2">{dayjs(dream.timestamp).format('YYYY-MM-DD')}</div>
                 <p className="mb-4">{dream.dream_text}</p>
@@ -292,8 +299,8 @@ const DreamJournal = () => {
             </button>
             {isFilterOpen && (
               <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg py-1">
-                <button className="w-full text-left px-3 py-2 hover:bg-gray-50 text-sm">latest first</button>
-                <button className="w-full text-left px-3 py-2 hover:bg-gray-50 text-sm">oldest first</button>
+                <button onClick={() => setSortOrder("newest")} className="w-full text-left px-3 py-2 hover:bg-gray-50 text-sm">latest first</button>
+                <button onClick={() => setSortOrder("oldest")} className="w-full text-left px-3 py-2 hover:bg-gray-50 text-sm">oldest first</button>
               </div>
             )}
           </div>
