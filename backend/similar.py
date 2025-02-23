@@ -7,11 +7,12 @@ import tensorflow as tf
 from sklearn.feature_extraction.text import TfidfVectorizer
 from nltk.corpus import stopwords
 from sklearn.cluster import KMeans
-import matplotlib as plt
+import matplotlib.pyplot as plt
 import logging
 import nltk
 from sklearn.decomposition import PCA
 nltk.download('stopwords')
+
 class similar_words():
     def __init__(self,passage):
         self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
@@ -23,8 +24,8 @@ class similar_words():
         self.dream  = ""
         self.vectorizer = ""
         self.matrix = None
-        self.stop_words = set(stopwords.words('english'))
-    def clean_text(text):
+        self.stop_words = list(stopwords.words('english'))
+    def clean_text(self, text):
         text = text.lower()  # Lowercase
         text = ''.join([char if char.isalnum() else ' ' for char in text])  # Remove punctuation
         text = ' '.join([word for word in text.split() if word not in self.stop_words])  # Remove stopwords
@@ -32,7 +33,7 @@ class similar_words():
 
     # what we do is we load the data frame in the same way we did the 
     def get_data(self):
-            folder_path = "../dreams"
+            folder_path = "./dreams"
             count = 0
             all_files = []
             for i in os.listdir(folder_path):
@@ -55,17 +56,18 @@ class similar_words():
         
     def vectorize_texts(self):
         self.data_frame = self.get_data()
-        vects = TfidfVectorizer(self.stop_words)
+        vects = TfidfVectorizer(stop_words=self.stop_words)
         matrix = vects.fit_transform(self.data_frame['content'])
         self.vectorizer = vects
         self.matrix = matrix
         return matrix
     def perform_kmeans(self, n_clusters=5):
         matrix_sample = self.vectorize_texts()
-        matrix_sample = matrix_sample[:200]
+        matrix_sample = matrix_sample[:200]  # Get first 200 samples
         kmeans = KMeans(n_clusters=n_clusters, random_state=42)
         cluster_labels = kmeans.fit_predict(matrix_sample)
-        self.data_frame.loc[:200, 'cluster'] = cluster_labels
+        self.data_frame = self.data_frame.iloc[:200]  # Trim DataFrame to match
+        self.data_frame['cluster'] = cluster_labels  # Now shapes match (200 vs 200)
         return cluster_labels
     def analyze_clusters(self):
         for i in range(5):  # Assuming 5 clusters
@@ -111,27 +113,7 @@ if __name__ == "__main__":
 
 
 # what we do is we load the data frame in the same way we did the 
-def get_data(self):
-        folder_path = "./dreams"
-        count = 0
-        all_files = []
-        for i in os.listdir(folder_path):
-            if i.endswith('.json'):
-                count+=1
-                all_files.append(i)
-        dreams = []
-        for i in all_files:
-            full_name  = os.path.join(folder_path,i)
-            with open(full_name,'r') as f:
-                data = json.load(f)
-                for x in data['dreams']:
-                    cleaned_content = clean_text(x.get("content", ""))
-                    dreams.append({
-                        "content": cleaned_content
-                    })
-                    
-        df = pd.DataFrame(dreams)
-        self.data_frame = df
+
 #the  we get a score for each of the dreams so use tf-idf
 #add the scores into the dataframe
 #then we can clean the data in a few steps
