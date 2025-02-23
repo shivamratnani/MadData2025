@@ -1,7 +1,0 @@
-Django>=5.1.6
-torch
-transformers
-numpy
-pandas
-python-dotenv
-supabase 

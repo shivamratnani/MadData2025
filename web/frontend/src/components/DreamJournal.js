@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
-import { Menu, ChevronDown, ChevronLeft } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Menu, ChevronDown, ChevronLeft, User } from 'lucide-react';
 import { submitDream } from '../api';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 const Calendar = () => {
   const today = new Date();
@@ -65,6 +67,8 @@ const Calendar = () => {
 };
 
 const DreamJournal = () => {
+  const navigate = useNavigate();
+  const { user, signOut } = useAuth();
   const [dreams, setDreams] = useState([
     {
       id: 1,
@@ -78,6 +82,15 @@ const DreamJournal = () => {
   const [newDream, setNewDream] = useState('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      navigate('/login');
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -112,6 +125,32 @@ const DreamJournal = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 font-mono">
+      <div className="fixed top-4 right-4 z-20 flex items-center gap-2">
+        {user ? (
+          <>
+            <button
+              onClick={handleSignOut}
+              className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded"
+            >
+              Sign Out
+            </button>
+            <button
+              onClick={() => navigate('/profile')}
+              className="p-2 hover:bg-gray-100 rounded-full"
+            >
+              <User className="w-6 h-6" />
+            </button>
+          </>
+        ) : (
+          <button
+            onClick={() => navigate('/login')}
+            className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800"
+          >
+            Login
+          </button>
+        )}
+      </div>
+
       <button 
         onClick={() => setIsSidebarOpen(true)}
         className="fixed top-4 left-4 p-2 z-20"

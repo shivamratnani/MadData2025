@@ -1,7 +1,7 @@
 from transformers import BertTokenizer, BertModel
 import torch
 import os
-from google.cloud import aiplatform
+from openai import OpenAI
 from dotenv import load_dotenv
 import logging
 
@@ -14,14 +14,15 @@ load_dotenv()
 
 class DreamAnalyzer:
     def __init__(self):
+        # Initialize OpenAI client for OpenRouter
+        self.client = OpenAI(
+            api_key=os.getenv("OPENROUTER_API_KEY"),
+            base_url=os.getenv("OPENROUTER_BASE_URL")
+        )
+        
         # Initialize BERT
         self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
         self.bert_model = BertModel.from_pretrained('bert-base-uncased')
-        
-        # Initialize Gemini client
-        self.gemini_key = os.getenv('GEMINI_API_KEY')
-        if not self.gemini_key:
-            raise ValueError("GEMINI_API_KEY not found in environment variables")
 
     async def extract_themes(self, dream_text):
         """Extract themes using BERT model"""
@@ -48,10 +49,9 @@ class DreamAnalyzer:
             logger.error(f"Error in BERT processing: {str(e)}")
             raise
 
-    async def get_gemini_analysis(self, dream_text, themes):
-        """Get detailed analysis from Gemini API"""
+    async def get_openai_analysis(self, dream_text, themes):
+        """Get detailed analysis through OpenRouter"""
         try:
-            # Construct prompt with dream and themes
             prompt = f"""Analyze this dream and its themes:
             Dream: {dream_text}
             Extracted Themes: {', '.join(themes)}
@@ -61,25 +61,26 @@ class DreamAnalyzer:
             2. Emotional undertones
             3. Possible interpretations
             4. Connections to the dreamer's psyche"""
+
+            response = self.client.chat.completions.create(
+                model="google/palm-2",
+                messages=[{"role": "user", "content": prompt}],
+                headers={
+                    "HTTP-Referer": "http://localhost:3000",  # Your site domain
+                    "X-Title": "Dream Analyzer"
+                }
+            )
             
-            # TODO: Implement actual Gemini API call
-            # This is a placeholder - implement your Gemini API integration
-            analysis = "Placeholder Gemini analysis"
-            
-            return analysis
+            return response.choices[0].message.content
         except Exception as e:
-            logger.error(f"Error in Gemini processing: {str(e)}")
+            logger.error(f"Error in OpenRouter processing: {str(e)}")
             raise
 
     async def analyze_dream(self, dream_text):
         """Complete dream analysis pipeline"""
         try:
-            # Extract themes using BERT
             themes = await self.extract_themes(dream_text)
-            
-            # Get detailed analysis from Gemini
-            analysis = await self.get_gemini_analysis(dream_text, themes)
-            
+            analysis = await self.get_openai_analysis(dream_text, themes)
             return {
                 "themes": themes,
                 "analysis": analysis,
