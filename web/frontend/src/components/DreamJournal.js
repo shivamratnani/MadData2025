@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, ChevronDown, ChevronRight, User, MessageCircle, Moon, Sun } from 'lucide-react';
 import { submitDream, fetchDreams } from '../api';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import { useAuth } from '../contexts/AuthContext';
 import dayjs from 'dayjs';
+import logo from '../assets/icon.png';
 
-const Calendar = () => {
+const Calendar = ({ dreams }) => {
   const today = new Date();
   const [currentMonth, setCurrentMonth] = useState(today);
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -32,6 +33,16 @@ const Calendar = () => {
     return days;
   };
 
+  // Add a function to check if a date has a dream entry
+  const hasDreamEntry = (year, month, day) => {
+    return dreams.some(dream => {
+      const dreamDate = new Date(dream.timestamp);
+      return dreamDate.getFullYear() === year &&
+             dreamDate.getMonth() === month &&
+             dreamDate.getDate() === day;
+    });
+  };
+
   // Update time every second
   useEffect(() => {
     const timer = setInterval(() => {
@@ -51,7 +62,7 @@ const Calendar = () => {
             setCurrentMonth(newMonth);
           }}>←</button>
           <span className="font-mono text-xs">
-            {currentMonth.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+            {currentMonth.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }).toLowerCase()}
           </span>
           <button onClick={() => {
             const newMonth = new Date(currentMonth);
@@ -69,8 +80,14 @@ const Calendar = () => {
                 ${day === today.getDate() && 
                   currentMonth.getMonth() === today.getMonth() &&
                   currentMonth.getFullYear() === today.getFullYear() 
-                  ? 'bg-gray-100 dark:bg-gray-700' : ''}
+                  ? 'border-2 border-blue-500' : ''}
+                ${day !== null && hasDreamEntry(
+                  currentMonth.getFullYear(),
+                  currentMonth.getMonth(),
+                  day
+                ) ? 'bg-gray-100 dark:bg-gray-700' : ''}
                 dark:text-gray-300
+                rounded
               `}
             >
               {day}
@@ -273,19 +290,39 @@ const DreamJournal = () => {
           esc
         </button>
 
+        <div className="flex items-center justify-center mt-6">
+          <img src={logo} alt="Dreams Logo" className="w-12 h-12 rounded-lg overflow-hidden" />
+          <span className="ml-3 text-xl font-semibold text-gray-800 dark:text-gray-200">
+            dreams
+          </span>
+        </div>
+
         <div className="mt-8 space-y-2 p-4">
-          <a href="#dreams" className="block py-2 hover:bg-gray-50 rounded px-3">my dreams</a>
-          <a href="#chat" className="block py-2 hover:bg-gray-50 rounded px-3 flex items-center gap-2">chat</a>
-          <a href="#themes" className="block py-2 hover:bg-gray-50 rounded px-3">themes & symbols</a>
-          <a href="#about" className="block py-2 hover:bg-gray-50 rounded px-3">about</a>
-          <a href="#account" className="block py-2 hover:bg-gray-50 rounded px-3">account</a>
+          <Link 
+            to="/" 
+            className="block py-2 bg-gray-200 dark:bg-dark-600 rounded px-3 text-gray-800 dark:text-gray-200"
+          >
+            home
+          </Link>
+          <Link 
+            to="/my-dreams" 
+            className="block py-2 hover:bg-gray-50 dark:hover:bg-dark-700 rounded px-3 text-gray-600 dark:text-gray-300"
+          >
+            my dreams
+          </Link>
+          <Link 
+            to="/about"
+            className="block py-2 hover:bg-gray-50 dark:hover:bg-dark-700 rounded px-3 text-gray-600 dark:text-gray-300"
+          >
+            about
+          </Link>
         </div>
       </nav>
 
       <div className="flex justify-center gap-8 p-8 pt-16">
         {/* Calendar Section */}
         <div className="space-y-2">
-          <Calendar />
+          <Calendar dreams={sortedDreams} />
         </div>
 
         {/* Dreams Section */}
@@ -309,13 +346,13 @@ const DreamJournal = () => {
             {sortedDreams.map((dream) => (
               <div key={dream.dream_id} className="bg-white dark:bg-dark-800 p-6 rounded-lg border border-gray-200 dark:border-dark-700">
                 <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-                  {dayjs(dream.timestamp).format('YYYY-MM-DD')}
+                  {dayjs(dream.timestamp).format('MMMM D, YYYY').toLowerCase()}
                 </div>
                 <p className="mb-4 text-gray-900 dark:text-gray-100">{dream.dream_text}</p>
                 <div className="flex flex-wrap gap-2 mb-4">
                   {dream.themes_symbols.map((tag, i) => (
                     <span key={i} className="px-3 py-1 bg-gray-100 rounded-full text-sm">
-                      {tag}
+                      {tag.toLowerCase()}
                     </span>
                   ))}
                 </div>

@@ -4,6 +4,8 @@ import { ArrowLeft, Send } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
+import logo from '../assets/icon.png';
+import dayjs from 'dayjs';
 
 const markdownStyles = {
   p: 'mb-4 last:mb-0',
@@ -47,7 +49,7 @@ const DreamChat = () => {
         
         setDreamData({
           text: data.dream_text,
-          date: new Date(data.timestamp).toISOString().split('T')[0],
+          date: dayjs(data.timestamp).format('MMMM D, YYYY'),
           tags: data.themes_symbols || [],
           analysis: data.interpretation || 'No analysis available',
         });
@@ -107,7 +109,7 @@ const DreamChat = () => {
               role: 'system',
               content: `You are a dream analysis assistant. Keep your responses focused and concise (2-3 paragraphs max). 
               Always relate your interpretations back to the specific elements of the user's dream: "${dreamData.text}". 
-              The identified themes are: ${dreamData.tags.join(', ')}. 
+              The identified themes are: ${dreamData.tags.map(tag => tag.toLowerCase()).join(', ')}. 
               Initial analysis: ${dreamData.analysis}
               
               Guidelines:
@@ -214,7 +216,7 @@ const DreamChat = () => {
           <div className="flex flex-wrap gap-2">
             {dreamData.tags.map((tag, i) => (
               <span key={i} className="px-3 py-1 bg-gray-100 rounded-full text-sm">
-                {tag}
+                {tag.toLowerCase()}
               </span>
             ))}
           </div>
