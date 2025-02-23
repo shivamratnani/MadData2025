@@ -127,6 +127,8 @@ const DreamJournal = () => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [sortOrder, setSortOrder] = useState("newest");
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [expandedTheme, setExpandedTheme] = useState(null);
+  const [showThemeContent, setShowThemeContent] = useState(false);
 
   // Initialize dark mode from localStorage
   useEffect(() => {
@@ -229,6 +231,38 @@ const DreamJournal = () => {
     
     console.log('Navigating to chat with dream ID:', dreamId);
     navigate(`/chat/${dreamId}`);
+  };
+
+  // Add new function to get theme counts and associated dreams
+  const getThemeCounts = () => {
+    const themeCounts = {};
+    const themeDreams = {};
+    
+    dreams.forEach(dream => {
+      dream.themes_symbols.forEach(theme => {
+        const normalizedTheme = theme.toLowerCase();
+        themeCounts[normalizedTheme] = (themeCounts[normalizedTheme] || 0) + 1;
+        themeDreams[normalizedTheme] = themeDreams[normalizedTheme] || [];
+        themeDreams[normalizedTheme].push(dream);
+      });
+    });
+
+    return { themeCounts, themeDreams };
+  };
+
+  // Modify the theme click handler to handle animations
+  const handleThemeClick = (theme) => {
+    if (expandedTheme === theme) {
+      setShowThemeContent(false);
+      setTimeout(() => {
+        setExpandedTheme(null);
+      }, 444); // Match the transition duration
+    } else {
+      setExpandedTheme(theme);
+      setTimeout(() => {
+        setShowThemeContent(true);
+      }, 50); // Small delay to ensure DOM update
+    }
   };
 
   return (
@@ -433,6 +467,119 @@ const DreamJournal = () => {
             )}
           </div>
         </div>
+      </div>
+
+      {/* After the filter section div, add: */}
+      <div className="w-full max-w-4xl mx-auto mt-12 p-6 bg-white dark:bg-dark-800 rounded-lg border border-gray-200 dark:border-dark-700">
+        <h2 className="text-lg text-gray-900 dark:text-gray-100 mb-4">themes & symbols</h2>
+        <div className="flex flex-wrap gap-2">
+          {Object.entries(getThemeCounts().themeCounts).map(([theme, count]) => (
+            <button
+              key={theme}
+              onClick={() => handleThemeClick(theme)}
+              className={`
+                px-3 py-1 rounded-full text-sm flex items-center gap-2
+                ${expandedTheme === theme 
+                  ? 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200' 
+                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'}
+                hover:bg-blue-50 dark:hover:bg-gray-600 transition-colors
+              `}
+            >
+              <span>{theme}</span>
+              <span className="bg-gray-200 dark:bg-gray-600 px-2 py-0.5 rounded-full text-xs">
+                {count}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        {/* Expanded theme details */}
+        {expandedTheme && (
+          <div 
+            className={`
+              mt-4 space-y-4 overflow-hidden transition-all duration-444 ease-in-out
+              ${showThemeContent ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'}
+            `}
+          >
+            {getThemeCounts().themeDreams[expandedTheme].map(dream => (
+              <div 
+                key={dream.dream_id} 
+                className={`
+                  p-4 bg-gray-50 dark:bg-dark-700 rounded-lg border border-gray-200 dark:border-dark-600
+                  transform transition-all duration-444 ease-in-out
+                  ${showThemeContent ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}
+                `}
+              >
+                {/* Date */}
+                <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+                  {dayjs(dream.timestamp).format('MMMM D, YYYY').toLowerCase()}
+                </div>
+
+                {/* Dream Text */}
+                <div className="text-gray-900 dark:text-gray-100 mb-4">
+                  {dream.dream_text.length > 200 
+                    ? `${dream.dream_text.substring(0, 200)}...` 
+                    : dream.dream_text}
+                </div>
+
+                {/* Related Themes */}
+                <div className="mb-4">
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                    themes & symbols
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {dream.themes_symbols.map((theme, index) => (
+                      <span
+                        key={index}
+                        className={`
+                          px-3 py-1 rounded-full text-sm transition-colors duration-444
+                          ${theme.toLowerCase() === expandedTheme
+                            ? 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200'
+                            : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'}
+                        `}
+                      >
+                        {theme.toLowerCase()}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Analysis */}
+                <div className="transform transition-all duration-444 ease-in-out">
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                    analysis
+                  </div>
+                  <div className="text-sm text-gray-600 dark:text-gray-300 pl-3 border-l-2 border-gray-200 dark:border-gray-600">
+                    <ReactMarkdown
+                      components={{
+                        p: ({node, ...props}) => <p className={markdownStyles.p} {...props} />,
+                        strong: ({node, ...props}) => <strong className={markdownStyles.strong} {...props} />,
+                        em: ({node, ...props}) => <em className={markdownStyles.em} {...props} />,
+                        ul: ({node, ...props}) => <ul className={markdownStyles.ul} {...props} />,
+                        ol: ({node, ...props}) => <ol className={markdownStyles.ol} {...props} />,
+                        li: ({node, ...props}) => <li className={markdownStyles.li} {...props} />,
+                        blockquote: ({node, ...props}) => <blockquote className={markdownStyles.blockquote} {...props} />
+                      }}
+                    >
+                      {dream.interpretation}
+                    </ReactMarkdown>
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="mt-4 flex gap-2">
+                  <button 
+                    onClick={() => handleChatClick(dream.dream_id)}
+                    className="text-sm border border-blue-500 rounded px-3 py-1 inline-flex items-center text-blue-500 transition-colors duration-444"
+                  >
+                    <MessageCircle className="w-4 h-4 mr-1" />
+                    chat about this dream
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
