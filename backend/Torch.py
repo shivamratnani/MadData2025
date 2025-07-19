@@ -1,5 +1,5 @@
 import torch
-from transformers import BertTokenizer, BertModel, BertForSequenceClassification
+
 import os
 import pandas as pd
 import json
@@ -9,12 +9,6 @@ import openai
 
 class Transformation:
     def __init__(self, passage):
-        # Initialize BERT
-        self.tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
-        self.bert_model = BertModel.from_pretrained("bert-base-uncased")
-        self.empty = []
-        self.data_frame = pd.DataFrame(self.empty)
-        # Initialize Gemini client
         self.openai_key = os.getenv("OPENAI_API_KEY")
         if not self.openai_key:
             raise ValueError("Openai_API_KEY not found in environment variables")
@@ -22,6 +16,10 @@ class Transformation:
         self.dream = ""
         self.themes = []
         self.symbols = []
+    def get_system_prompt(self):
+
+        return """YOU ARE A DREAMS INTERPRETER. You will be given a dream and you will interpret it using common dream symbolism and themes.
+        You will also provide insights into the dreamer's subconscious mind and emotional state based on the dream"""    
 
     def get_data(self):
         folder_path = "./dreams"
@@ -41,35 +39,17 @@ class Transformation:
 
         df = pd.DataFrame(dreams)
         self.data_frame = df
-
-    def get_Bert_Features(self, sentence):
-        # model from bert trained
-        self.model = BertModel.from_pretrained("bert-base-uncased")
-        # tokenizer will break the sentence down and split into word array and then
-        self.tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
-        text = "I had a dream about flying"
-        # this is the input that automozatically converts into nunmbers
-        inputs = self.tokenizer(
-            text, return_tensors="pt", max_length=512, truncation=True, padding=True
+    def get_embeddings(self, text):
+        """
+        Get vector embeddings for a given text using OpenAI's text-embedding-ada-002 model.
+        """
+        response = openai.Embedding.create(
+            model="text-embedding-ada-002",
+            input=text
         )
-        # print(inputs)
+        embeddings = response['data'][0]['embedding']
+        return embeddings
 
-        # print("dinfosdnfosdnofsdn")
-        # another waybof going about it where we can break it down
-        inp = self.tokenizer.tokenize(sentence)
-        # then convert each word into a numerical value
-        ids = self.tokenizer.convert_tokens_to_ids(inp)
-        # print(ids)
-        # convert the numerical array into a tensor
-        tens_ids = torch.tensor(ids)
-        # want to
-        with torch.no_grad():
-            outputs = self.model(**inputs)
-
-        last_hidden_state = outputs.last_hidden_state
-        pooled_output = outputs.pooler_output
-        return last_hidden_state
-        #return pooled_output
 
     def llm_processing(self):
         # we are going to use openai and
